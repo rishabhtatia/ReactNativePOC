@@ -12,7 +12,7 @@ const LogoTitle = () => <Image style={{ width: 50, height: 50 }} source={require
 
 const Navigation = () => {
   return (
-    <Stack.Navigator initialRouteName="Home">
+    <Stack.Navigator initialRouteName="Login">
       <Stack.Screen
         name="Login"
         component={LoginScreen}
