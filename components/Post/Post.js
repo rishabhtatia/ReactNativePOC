@@ -1,7 +1,8 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import { Text, StyleSheet, View, FlatList, TextInput } from "react-native";
+import { Text, StyleSheet, View } from "react-native";
 import { globalStyles } from "../../styles/global";
+import Card from "../common/Card/Card";
 
 const Post = ({ route, navigation }) => {
   const { listId } = route.params;
@@ -17,18 +18,11 @@ const Post = ({ route, navigation }) => {
       });
   }, []);
   return (
-    <View style={styles.container}>
+    <Card>
       <Text style={globalStyles.titleText}>{listData.title}</Text>
       <Text style={globalStyles.paragraphText}>{listData.body}</Text>
-    </View>
+    </Card>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "white",
-    padding: 10,
-  },
-});
 
 export default Post;

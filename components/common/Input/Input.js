@@ -6,6 +6,7 @@ const Input = (props) => {
   const {
     placeholder = "Enter Text..",
     placeholderTextColor = "#003f5c",
+    value = "",
     onChangeHandler = () => {},
     error = "",
     secureTextEntry = false,
@@ -16,6 +17,7 @@ const Input = (props) => {
         style={[styles.textInput, globalStyles.paragraphText]}
         placeholder={placeholder}
         placeholderTextColor={placeholderTextColor}
+        value={value}
         onChangeText={onChangeHandler}
         secureTextEntry={secureTextEntry}
       />

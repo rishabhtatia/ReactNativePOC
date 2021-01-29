@@ -1,15 +1,26 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, Text, StyleSheet, View, FlatList, TextInput } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import {
+  Text,
+  StyleSheet,
+  View,
+  FlatList,
+  TextInput,
+  Modal,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { globalStyles } from "../../styles/global";
+import Card from "../common/Card/Card";
+import AddPostModal from "../AddPostModal/AddPostModal";
 
 const Home = ({ navigation }) => {
   const [search, setSearch] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
-
+  const [modalOpen, setModalOpen] = useState(false);
   useEffect(() => {
     axios
       .get("https://jsonplaceholder.typicode.com/posts")
@@ -45,18 +56,24 @@ const Home = ({ navigation }) => {
 
   const Item = ({ item }) => {
     return (
-      <View style={styles.item}>
-        <TouchableOpacity>
-          <MaterialIcons name="delete" size={24} color="#333" onPress={() => deleteHandler(item.id)} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Post", { listId: item.id })}>
-          <Text style={globalStyles.paragraphText}>
-            {item.id}
-            {"."}
-            {item.title}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <Card>
+        <View style={styles.item}>
+          <View style={{ flex: 1 }}>
+            <TouchableOpacity onPress={() => navigation.navigate("Post", { listId: item.id })}>
+              <Text style={globalStyles.paragraphText}>
+                {item.id}
+                {"."}
+                {item.title}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <TouchableOpacity>
+              <MaterialIcons name="delete" size={24} color="#333" onPress={() => deleteHandler(item.id)} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Card>
     );
   };
 
@@ -64,9 +81,33 @@ const Home = ({ navigation }) => {
     return <View style={styles.separator} />;
   };
 
+  const AddPost = (post) => {
+    post.id = originalData.length + 1;
+    setFilteredData((currentPosts) => {
+      return [post, ...currentPosts];
+    });
+    setModalOpen(false);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.headingText}>POSTS</Text>
+      <Modal visible={modalOpen} animationType="slide">
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalContent}>
+            <MaterialIcons
+              name="close"
+              size={35}
+              onPress={() => setModalOpen(false)}
+              style={[styles.modalToggle, styles.modalClose]}
+            />
+            <AddPostModal AddPost={AddPost} />
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+      <View style={styles.headingTitle}>
+        <Text style={styles.headingText}>POSTS</Text>
+        <MaterialIcons name="add" size={30} onPress={() => setModalOpen(true)} style={styles.modalToggle} />
+      </View>
       <TextInput style={styles.textInputStyle} onChangeText={onSearch} value={search} placeholder="Search Here" />
       <FlatList
         data={filteredData}
@@ -84,14 +125,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   item: {
-    padding: 5,
-    marginRight: 20,
+    padding: 10,
+    flex: 1,
     flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
     fontFamily: "nunito-regular",
+  },
+  headingTitle: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   headingText: {
     paddingLeft: 20,
     margin: 5,
+    fontSize: 30,
     fontWeight: "bold",
     fontFamily: "nunito-bold",
   },
@@ -109,6 +157,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
   },
+  modalContent: {
+    flex: 1,
+    padding: 10,
+  },
+  modalToggle: {
+    borderWidth: 1,
+    borderColor: "#A9A9A9",
+    borderRadius: 20,
+  },
+  modalClose: { alignSelf: "center", borderColor: "white", marginTop: 10 },
 });
 
 export default Home;

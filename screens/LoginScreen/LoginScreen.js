@@ -4,8 +4,8 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import Input from "../../components/common/Input/Input";
 
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("rishabh.tatia@gmail.com");
+  const [password, setPassword] = useState("12");
   const [formErrors, setFormErrors] = useState({});
   const validateEmail = (email) => {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -20,6 +20,7 @@ const LoginScreen = ({ navigation }) => {
       setFormErrors(updatedErrorState);
       return;
     }
+    setFormErrors({});
     navigation.navigate("Home");
   };
 
@@ -30,6 +31,7 @@ const LoginScreen = ({ navigation }) => {
       <Input
         placeholder="Email"
         placeholderTextColor="#003f5c"
+        value={email}
         onChangeHandler={(email) => setEmail(email)}
         error={formErrors.email}
       />
@@ -37,6 +39,7 @@ const LoginScreen = ({ navigation }) => {
         placeholder="Password."
         placeholderTextColor="#003f5c"
         onChangeHandler={(password) => setPassword(password)}
+        value={password}
         error={formErrors.password}
         secureTextEntry={true}
       />
