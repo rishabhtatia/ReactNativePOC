@@ -11,6 +11,7 @@ const getFonts = () =>
   Font.loadAsync({
     "nunito-regular": require("./assets/fonts/Nunito-Regular.ttf"),
     "nunito-bold": require("./assets/fonts/Nunito-Bold.ttf"),
+    "dancing-bold": require("./assets/fonts/DancingScript-Bold.ttf"),
   });
 const Drawer = createDrawerNavigator();
 
@@ -19,6 +20,7 @@ const App = () => {
   if (fontsLoaded) {
     return (
       <NavigationContainer>
+        <StatusBar style="auto" />
         <Drawer.Navigator initialRouteName="Login">
           <Drawer.Screen name="Login" component={Navigation} />
           <Drawer.Screen name="About Us" component={AboutNavigation} />

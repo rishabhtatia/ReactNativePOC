@@ -4,7 +4,7 @@
     "slug": "POC",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon1.png",
+    "icon": "./assets/ic_launcher.png",
     "splash": {
       "image": "./assets/splash1.png",
       "resizeMode": "contain",
@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/ic_launcher_round.png",
         "backgroundColor": "#FFFFFF"
       },
       "package": "demo.apk"

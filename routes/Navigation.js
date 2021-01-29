@@ -3,12 +3,12 @@ import { createStackNavigator } from "@react-navigation/stack";
 import LoginScreen from "../screens/LoginScreen/LoginScreen";
 import Home from "../components/Home/Home";
 import Post from "../components/Post/Post";
-import { Image, Platform } from "react-native";
+import { Image, Platform, View } from "react-native";
 import Constants from "expo-constants";
 import Header from "../components/common/Header/Header";
+import LogoTitle from "../components/common/LogoTitle/LogoTitle";
 
 const Stack = createStackNavigator();
-const LogoTitle = () => <Image style={{ width: 50, height: 50 }} source={require("../assets/favicon.png")} />;
 
 const Navigation = () => {
   return (
@@ -18,11 +18,11 @@ const Navigation = () => {
         component={LoginScreen}
         options={(navigate) => {
           return {
-            headerTitle: () => <Header navigate={navigate} title="Login" />,
+            headerTitle: () => <Header navigate={navigate} title="LOGIN" />,
             headerBackground: () => (
               <Image
                 source={require("../assets/background.png")}
-                style={{ marginTop: Platform.OS === "ios" ? 0 : Constants.statusBarHeight }}
+                style={{ marginTop: Platform.OS === "ios" ? 0 : Constants.statusBarHeight, flex: 1 }}
               />
             ),
           };
@@ -33,9 +33,15 @@ const Navigation = () => {
         component={Home}
         options={{
           title: "HOME",
-          headerStyle: {
-            backgroundColor: "#f4511e",
-          },
+          headerBackground: () => (
+            <View
+              style={{
+                backgroundColor: "#f4511e",
+                marginTop: Platform.OS === "ios" ? 0 : Constants.statusBarHeight,
+                flex: 1,
+              }}
+            ></View>
+          ),
           headerTintColor: "#fff",
           headerTitleStyle: {
             fontWeight: "bold",
@@ -43,10 +49,16 @@ const Navigation = () => {
         }}
       />
       <Stack.Screen
-        name="Post"
+        name="POST"
         component={Post}
         options={{
           headerRight: () => <LogoTitle />,
+          headerBackground: () => (
+            <Image
+              source={require("../assets/background.png")}
+              style={{ marginTop: Platform.OS === "ios" ? 0 : Constants.statusBarHeight, flex: 1 }}
+            />
+          ),
         }}
       />
     </Stack.Navigator>

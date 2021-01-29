@@ -15,7 +15,7 @@ const AboutNavigation = () => {
         component={AboutUs}
         options={(navigate) => {
           return {
-            headerTitle: () => <Header navigate={navigate} title="About Us" />,
+            headerTitle: () => <Header navigate={navigate} title="ABOUT US" />,
             headerBackground: () => (
               <Image
                 source={require("../assets/background.png")}

@@ -10,6 +10,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { globalStyles } from "../../styles/global";
@@ -17,6 +19,7 @@ import Card from "../common/Card/Card";
 import AddPostModal from "../AddPostModal/AddPostModal";
 
 const Home = ({ navigation }) => {
+  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
@@ -27,9 +30,11 @@ const Home = ({ navigation }) => {
       .then((response) => {
         setFilteredData(response.data);
         setOriginalData(response.data);
+        setIsLoading(false);
       })
       .catch((error) => {
         console.error(error);
+        setIsLoading(false);
       });
   }, []);
 
@@ -91,6 +96,7 @@ const Home = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar style="auto" />
       <Modal visible={modalOpen} animationType="slide">
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.modalContent}>
@@ -104,17 +110,25 @@ const Home = ({ navigation }) => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-      <View style={styles.headingTitle}>
-        <Text style={styles.headingText}>POSTS</Text>
-        <MaterialIcons name="add" size={30} onPress={() => setModalOpen(true)} style={styles.modalToggle} />
-      </View>
-      <TextInput style={styles.textInputStyle} onChangeText={onSearch} value={search} placeholder="Search Here" />
-      <FlatList
-        data={filteredData}
-        keyExtractor={(item, index) => index.toString()}
-        ItemSeparatorComponent={ItemSeparator}
-        renderItem={Item}
-      />
+      {isLoading ? (
+        <View style={styles.loadingSpinner}>
+          <ActivityIndicator size="large" color="purple" />
+        </View>
+      ) : (
+        <>
+          <View style={styles.headingTitle}>
+            <Text style={styles.headingText}>POSTS</Text>
+            <MaterialIcons name="add" size={30} onPress={() => setModalOpen(true)} style={styles.modalToggle} />
+          </View>
+          <TextInput style={styles.textInputStyle} onChangeText={onSearch} value={search} placeholder="Search Here" />
+          <FlatList
+            data={filteredData}
+            keyExtractor={(item, index) => index.toString()}
+            ItemSeparatorComponent={ItemSeparator}
+            renderItem={Item}
+          />
+        </>
+      )}
     </View>
   );
 };
@@ -167,6 +181,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   modalClose: { alignSelf: "center", borderColor: "white", marginTop: 10 },
+  loadingSpinner: { margin: 20 },
 });
 
 export default Home;
