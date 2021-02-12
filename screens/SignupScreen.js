@@ -10,7 +10,8 @@ import {
   Keyboard,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import axios from "axios";
+import CONSTANTS from "../constants/const";
 
 const SignupScreen = (props) => {
   const { navigation } = props;
@@ -36,8 +37,16 @@ const SignupScreen = (props) => {
 
   useEffect(() => {}, []);
   const onSubmit = async (data) => {
-    console.log(data);
-    navigation.navigate("Login");
+    axios.post(`${CONSTANTS.BASEURL}/api/signup`, data).then(
+      (response) => {
+        navigation.replace("Login");
+      },
+      (error) => {
+        console.log(error);
+        setLoginError(error?.response?.data?.message);
+        clearError();
+      }
+    );
   };
 
   return (

@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, TextInput, StatusBar } from "
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CONSTANTS from "../constants/const";
 
 const LoginScreen = (props) => {
   const initialFormValues = {
@@ -13,7 +14,6 @@ const LoginScreen = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const { control, handleSubmit, errors, reset } = useForm();
   const [loginError, setLoginError] = useState("");
-
   const clearError = () => {
     setTimeout(() => {
       setLoginError("");
@@ -34,7 +34,7 @@ const LoginScreen = (props) => {
 
   useEffect(() => {}, []);
   const onSubmit = async (data) => {
-    axios.post("http://192.168.0.100:3000/api/login", data).then(
+    axios.post(`${CONSTANTS.BASEURL}/api/login`, data).then(
       async (response) => {
         const token = response.data.token;
         await storeToken(token);

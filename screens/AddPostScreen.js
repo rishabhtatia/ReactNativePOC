@@ -1,49 +1,133 @@
+import React, { useState, useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React from "react";
-import { ActivityIndicator, Image, StyleSheet, View } from "react-native";
-import { TextInput, Button, Switch, Provider, Text, HelperText, Avatar, Portal, Modal, Card } from "react-native-paper";
+import { Image, StyleSheet, View } from "react-native";
+import {
+  TextInput,
+  Button,
+  Switch,
+  Provider,
+  Text,
+  HelperText,
+  Avatar,
+  Portal,
+  Modal,
+  Card,
+  Snackbar,
+} from "react-native-paper";
 import { useForm, Controller } from "react-hook-form";
-import { useState } from "react";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { ScrollView, TouchableWithoutFeedback } from "react-native-gesture-handler";
 import * as ImagePicker from "expo-image-picker";
+import CONSTANTS from "../constants/const";
 import axios from "axios";
+import { ActivityIndicator } from "react-native-paper";
 const AddPostScreen = (props) => {
-  const { navigation } = props;
-  const { control, errors, handleSubmit } = useForm({
+  const { navigation, route } = props;
+  const [visible, setVisible] = useState(false);
+  const [imageUrl, setImageUrl] = useState(null);
+  const [modalImage, setModalImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [formData, setFormData] = useState(false);
+  const [postingError, setPostingError] = useState("");
+  const onDismissSnackBar = () => setPostingError("");
+  const clearError = () => {
+    setTimeout(() => {
+      setPostingError("");
+    }, 5000);
+  };
+  const showModal = (image) => {
+    setModalImage(null);
+    setModalImage(image);
+    setVisible(true);
+  };
+  const hideModal = () => setVisible(false);
+  const { control, errors, setValue, handleSubmit } = useForm({
     mode: "onBlur",
   });
+  const setFormValues = ({
+    author = "",
+    title = "",
+    language = "",
+    country = "",
+    genre = "",
+    pages = "",
+    _id = "",
+  }) => {
+    setValue("author", author);
+    setValue("title", title);
+    setValue("language", language);
+    setValue("country", country);
+    setValue("genre", genre);
+    setValue("pages", pages);
+  };
+  const getPost = async () => {
+    const token = await AsyncStorage.getItem("token");
+    const id = route?.params?.id;
+    try {
+      const resp = await axios.get(`${CONSTANTS.BASEURL}/api/post/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFormData(resp.data?.book);
+      setIsLoading(false);
+      setImageUrl(null);
+      setImageUrl(`${CONSTANTS.BASEURL}/api/imagepost/${id}`);
+    } catch (err) {
+      console.log(err);
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    if (route?.params?.id !== "new" && route?.params?.id !== undefined) {
+      setFormValues(formData);
+    }
+  }, [isLoading]);
+  useEffect(() => {
+    if (route?.params?.id !== "new" && route?.params?.id !== undefined) {
+      getPost();
+    } else {
+      setIsLoading(false);
+    }
+  }, []);
   const createFormData = (photo, body) => {
     let formData = new FormData();
-    // formData.append("image", {
-    //   name: `${Date.now().toString()}`,
-    //   type: "multipart/form-data",
-    //   uri: Platform.OS === "android" ? imageUrl.uri : imageUrl.uri.replace("file://", ""),
-    // });
+    if (photo) {
+      formData.append("image", {
+        name: `${Date.now().toString()}`,
+        type: "multipart/form-data",
+        uri: Platform.OS === "android" ? photo : photo.replace("file://", ""),
+      });
+    }
     Object.keys(body).forEach((key) => {
       formData.append(key, body[key]);
     });
     return formData;
   };
-  const submit = (data) => {
+  const submit = async (data) => {
+    const token = await AsyncStorage.getItem("token");
     const payload = createFormData(imageUrl, data);
-    console.log(payload);
-    axios
-      .post("http://192.168.0.100:3000/api/imagepost", payload)
-      .then((resp) => console.log(resp.data))
-      .catch((err) => {
-        console.log(err);
-        console.log(err?.response?.message);
-      });
-  };
-
-  const removeValue = async (navigation) => {
     try {
-      await AsyncStorage.removeItem("token");
-      navigation.replace("Login");
-    } catch (error) {
-      console.log(error);
+      if (route?.params?.id !== "new" && route?.params?.id !== undefined) {
+        const resp = await axios.patch(`${CONSTANTS.BASEURL}/api/updatepost/${route?.params?.id}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log(resp.data.message);
+        console.log("MIne");
+        navigation.navigate("Home");
+      } else {
+        const resp = await axios.post(`${CONSTANTS.BASEURL}/api/addpost`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log(resp.data.message);
+        navigation.navigate("Home");
+      }
+    } catch (err) {
+      console.log("ERROR");
+      console.log(err?.response);
+      console.log(err?.response?.data?.message);
+      setPostingError(err?.response?.data?.message);
+      clearError();
     }
   };
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -52,146 +136,185 @@ const AddPostScreen = (props) => {
       quality: 1,
     });
     if (!result.cancelled) {
-      // setImageData((prevState) => [...prevState, { title: prevState.length + "1", imageUrl: { uri: result.uri } }]);
-      setImageUrl(result);
+      console.log("PICK");
+      setModalImage(null);
+      setModalImage(result.uri);
     }
   };
-  const [visible, setVisible] = useState(false);
-  const [imageUrl, setImageUrl] = useState({
-    uri: "http://192.168.0.100:3000/api/getimagepost/6023cd8645f6de97080835b9",
-  });
-  const showModal = () => setVisible(true);
-  const hideModal = () => setVisible(false);
+
+  const changeImage = () => {
+    if (imageUrl !== modalImage) {
+      setImageUrl(null);
+      setImageUrl(modalImage);
+      console.log("Changed");
+    }
+    hideModal();
+  };
   return (
-    <Provider>
-      <View style={styles.container}>
-        <Portal>
-          <Modal visible={visible} onDismiss={hideModal}>
-            <Card>
-              <Card.Cover source={{ uri: imageUrl.uri }} />
-              <Card.Actions>
-                <Button onPress={hideModal}>Cancel</Button>
-                <Button onPress={pickImage}>Edit</Button>
-              </Card.Actions>
-            </Card>
-          </Modal>
-        </Portal>
-        <TouchableWithoutFeedback onPress={showModal}>
-          <View style={{ alignItems: "center" }}>
-            <Avatar.Image size={200} source={{ uri: imageUrl.uri }} />
-          </View>
-        </TouchableWithoutFeedback>
-        <Controller
-          control={control}
-          defaultValue=""
-          name="author"
-          rules={{ required: "The value is required" }}
-          render={({ onChange, onBlur, value }) => (
+    <ScrollView>
+      <Provider>
+        <View style={styles.container}>
+          {isLoading ? (
+            <ActivityIndicator animating={true} size={100} color="#fb5b5a" />
+          ) : (
             <>
-              <TextInput
-                label="Author"
-                style={styles.input}
-                value={value}
-                mode="outlined"
-                multiline={true}
-                onBlur={onBlur}
-                onChangeText={(value) => onChange(value)}
-                theme={{ colors: { text: "black", placeholder: "black", primary: "black" } }}
+              <Portal>
+                <Modal visible={visible} onDismiss={hideModal} dismissable={false}>
+                  <Card>
+                    <Card.Cover
+                      source={{
+                        uri: modalImage,
+                      }}
+                      style={{ height: 250 }}
+                    />
+                    <Card.Actions>
+                      <Button onPress={hideModal}>Cancel</Button>
+                      <Button icon="camera" onPress={pickImage}>
+                        Edit
+                      </Button>
+                      <Button onPress={() => changeImage()}>Done</Button>
+                    </Card.Actions>
+                  </Card>
+                </Modal>
+              </Portal>
+              <TouchableWithoutFeedback onPress={() => showModal(imageUrl)}>
+                <View style={{ alignItems: "center", justifyContent: "center" }}>
+                  <Text>{imageUrl}</Text>
+                  <Text>{modalImage}</Text>
+                  <Avatar.Image
+                    size={200}
+                    source={{
+                      uri: imageUrl,
+                    }}
+                    style={{ alignSelf: "center" }}
+                  />
+                </View>
+              </TouchableWithoutFeedback>
+              <Controller
+                control={control}
+                defaultValue=""
+                name="author"
+                rules={{ required: "The value is required" }}
+                render={({ onChange, onBlur, value }) => (
+                  <>
+                    <TextInput
+                      label="Author"
+                      style={styles.input}
+                      value={value}
+                      mode="outlined"
+                      multiline={true}
+                      onBlur={onBlur}
+                      onChangeText={(value) => onChange(value)}
+                      theme={{ colors: { text: "black", placeholder: "black", primary: "black" } }}
+                    />
+                    {errors.author?.message && (
+                      <HelperText type="error" padding="normal">
+                        {errors.author?.message}
+                      </HelperText>
+                    )}
+                  </>
+                )}
               />
-              {errors.author?.message && (
-                <HelperText type="error" padding="normal">
-                  {errors.author?.message}
-                </HelperText>
-              )}
+              <Controller
+                control={control}
+                name="title"
+                defaultValue=""
+                render={({ onBlur, onChange, value }) => (
+                  <TextInput
+                    label="Title"
+                    style={styles.input}
+                    onBlur={onBlur}
+                    value={value}
+                    mode="outlined"
+                    onChangeText={(value) => onChange(value)}
+                    theme={{ colors: { text: "black", placeholder: "black", primary: "black" } }}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="language"
+                defaultValue=""
+                render={({ onBlur, onChange, value }) => (
+                  <TextInput
+                    label="Language"
+                    style={styles.input}
+                    onBlur={onBlur}
+                    value={value}
+                    mode="outlined"
+                    onChangeText={(value) => onChange(value)}
+                    theme={{ colors: { text: "black", placeholder: "black", primary: "black" } }}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="country"
+                defaultValue=""
+                render={({ onBlur, onChange, value }) => (
+                  <TextInput
+                    label="Country"
+                    style={styles.input}
+                    onBlur={onBlur}
+                    value={value}
+                    mode="outlined"
+                    onChangeText={(value) => onChange(value)}
+                    theme={{ colors: { text: "black", placeholder: "black", primary: "black" } }}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="genre"
+                defaultValue=""
+                render={({ onBlur, onChange, value }) => (
+                  <TextInput
+                    label="Genre"
+                    style={styles.input}
+                    onBlur={onBlur}
+                    value={value}
+                    mode="outlined"
+                    onChangeText={(value) => onChange(value)}
+                    theme={{ colors: { text: "black", placeholder: "black", primary: "black" } }}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="pages"
+                defaultValue=""
+                render={({ onBlur, onChange, value }) => (
+                  <TextInput
+                    label="Pages"
+                    style={styles.input}
+                    onBlur={onBlur}
+                    value={value}
+                    mode="outlined"
+                    onChangeText={(value) => onChange(value)}
+                    theme={{ colors: { text: "black", placeholder: "black", primary: "black" } }}
+                  />
+                )}
+              />
+              <HelperText type="error">{errors.pages?.message}</HelperText>
+              <Button mode="contained" onPress={handleSubmit(submit)}>
+                Submit
+              </Button>
+              <Text style={styles.errorText}>{postingError}</Text>
+              <Snackbar
+                visible={postingError}
+                onDismiss={onDismissSnackBar}
+                action={{
+                  label: "Close",
+                  onPress: () => setPostingError(""),
+                }}
+              >
+                {postingError}
+              </Snackbar>
             </>
           )}
-        />
-        <Controller
-          control={control}
-          name="title"
-          defaultValue=""
-          render={({ onBlur, onChange, value }) => (
-            <TextInput
-              label="Title"
-              style={styles.input}
-              onBlur={onBlur}
-              value={value}
-              mode="outlined"
-              onChangeText={(value) => onChange(value)}
-              theme={{ colors: { text: "black", placeholder: "black", primary: "black" } }}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="language"
-          defaultValue=""
-          render={({ onBlur, onChange, value }) => (
-            <TextInput
-              label="Language"
-              style={styles.input}
-              onBlur={onBlur}
-              value={value}
-              mode="outlined"
-              onChangeText={(value) => onChange(value)}
-              theme={{ colors: { text: "black", placeholder: "black", primary: "black" } }}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="country"
-          defaultValue=""
-          render={({ onBlur, onChange, value }) => (
-            <TextInput
-              label="Country"
-              style={styles.input}
-              onBlur={onBlur}
-              value={value}
-              mode="outlined"
-              onChangeText={(value) => onChange(value)}
-              theme={{ colors: { text: "black", placeholder: "black", primary: "black" } }}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="genre"
-          defaultValue=""
-          render={({ onBlur, onChange, value }) => (
-            <TextInput
-              label="Genre"
-              style={styles.input}
-              onBlur={onBlur}
-              value={value}
-              mode="outlined"
-              onChangeText={(value) => onChange(value)}
-              theme={{ colors: { text: "black", placeholder: "black", primary: "black" } }}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="pages"
-          defaultValue=""
-          render={({ onBlur, onChange, value }) => (
-            <TextInput
-              label="Pages"
-              style={styles.input}
-              onBlur={onBlur}
-              value={value}
-              mode="outlined"
-              onChangeText={(value) => onChange(value)}
-              theme={{ colors: { text: "black", placeholder: "black", primary: "black" } }}
-            />
-          )}
-        />
-        <HelperText type="error">{errors.pages?.message}</HelperText>
-        <Button mode="contained" onPress={handleSubmit(submit)}>
-          Submit
-        </Button>
-      </View>
-    </Provider>
+        </View>
+      </Provider>
+    </ScrollView>
   );
 };
 
@@ -201,8 +324,15 @@ const styles = StyleSheet.create({
     // backgroundColor: "#00a4ccff",
     justifyContent: "center",
     paddingHorizontal: 30,
+    marginTop: 30,
   },
   input: { marginVertical: 5, backgroundColor: "white" },
+  errorText: {
+    color: "red",
+    alignSelf: "center",
+    fontSize: 15,
+    paddingBottom: 20,
+  },
   // row: {
   //   alignItems: "center",
   //   flexDirection: "row",
