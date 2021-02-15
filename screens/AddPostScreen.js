@@ -26,6 +26,7 @@ const AddPostScreen = (props) => {
   const [imageUrl, setImageUrl] = useState(null);
   const [modalImage, setModalImage] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [onSubmitLoading, setonSubmitLoading] = useState(false);
   const [formData, setFormData] = useState(false);
   const [postingError, setPostingError] = useState("");
   const onDismissSnackBar = () => setPostingError("");
@@ -102,6 +103,7 @@ const AddPostScreen = (props) => {
     return formData;
   };
   const submit = async (data) => {
+    setonSubmitLoading(true);
     const token = await AsyncStorage.getItem("token");
     const payload = createFormData(imageUrl, data);
     try {
@@ -110,20 +112,21 @@ const AddPostScreen = (props) => {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log(resp.data.message);
-        console.log("MIne");
-        navigation.navigate("Home");
+        navigation.navigate("Home", { refresh: true });
       } else {
         const resp = await axios.post(`${CONSTANTS.BASEURL}/api/addpost`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log(resp.data.message);
-        navigation.navigate("Home");
+        navigation.navigate("Home", { refresh: true });
       }
+      setonSubmitLoading(false);
     } catch (err) {
       console.log("ERROR");
       console.log(err?.response);
       console.log(err?.response?.data?.message);
       setPostingError(err?.response?.data?.message);
+      setonSubmitLoading(false);
       clearError();
     }
   };
@@ -136,7 +139,6 @@ const AddPostScreen = (props) => {
       quality: 1,
     });
     if (!result.cancelled) {
-      console.log("PICK");
       setModalImage(null);
       setModalImage(result.uri);
     }
@@ -146,7 +148,6 @@ const AddPostScreen = (props) => {
     if (imageUrl !== modalImage) {
       setImageUrl(null);
       setImageUrl(modalImage);
-      console.log("Changed");
     }
     hideModal();
   };
@@ -296,7 +297,7 @@ const AddPostScreen = (props) => {
                 )}
               />
               <HelperText type="error">{errors.pages?.message}</HelperText>
-              <Button mode="contained" onPress={handleSubmit(submit)}>
+              <Button mode="contained" onPress={handleSubmit(submit)} loading={onSubmitLoading}>
                 Submit
               </Button>
               <Text style={styles.errorText}>{postingError}</Text>
