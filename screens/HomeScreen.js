@@ -107,7 +107,7 @@ const HomeScreen = (props) => {
                   >
                     <Image
                       source={{ uri: item.image }}
-                      style={{ width: 70, height: 70, borderRadius: 70, marginRight: 10, resizeMode: "cover" }}
+                      style={{ width: 70, height: 70, borderRadius: 90, marginRight: 10 }}
                     />
                     <View style={{ flexShrink: 1 }}>
                       <Text style={{ fontSize: 22, fontWeight: "800" }}>{item.title}</Text>

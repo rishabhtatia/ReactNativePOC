@@ -124,7 +124,6 @@ const AddPostScreen = (props) => {
     } catch (err) {
       console.log("ERROR");
       console.log(err?.response);
-      console.log(err?.response?.data?.message);
       setPostingError(err?.response?.data?.message);
       setonSubmitLoading(false);
       clearError();
@@ -166,7 +165,7 @@ const AddPostScreen = (props) => {
                       source={{
                         uri: `${modalImage}`,
                       }}
-                      style={{ height: 250 }}
+                      style={{ height: 350, resizeMode: "cover" }}
                     />
                     <Card.Actions>
                       <Button onPress={hideModal}>Cancel</Button>
