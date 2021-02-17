@@ -7,7 +7,7 @@ import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { createStackNavigator } from "@react-navigation/stack";
 import Icon from "react-native-vector-icons/Ionicons";
 import { View } from "react-native";
-import firebase from "firebase";
+// import firebase from "firebase";
 
 const Tab = createMaterialBottomTabNavigator();
 

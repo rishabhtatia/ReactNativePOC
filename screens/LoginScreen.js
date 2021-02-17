@@ -4,10 +4,13 @@ import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CONSTANTS from "../constants/const";
+import * as Facebook from "expo-facebook";
+import { FontAwesome, AntDesign } from "@expo/vector-icons";
+import * as Google from "expo-google-app-auth";
 
 const LoginScreen = (props) => {
   const initialFormValues = {
-    email: "rishabhtatia1@gmail.com",
+    email: "rishabhtatia211@gmail.com",
     password: "rishabh",
   };
   const { navigation } = props;
@@ -32,7 +35,58 @@ const LoginScreen = (props) => {
     }
   };
 
-  useEffect(() => {}, []);
+  const LogInWithGoogle = async () => {
+    try {
+      const result = await Google.logInAsync({
+        androidClientId: "950641988058-a4d1n4cg1hskbch97tm6lirbi9qj27d1.apps.googleusercontent.com",
+        scopes: ["profile", "email"],
+      });
+
+      if (result.type === "success") {
+        const { user, accessToken } = result;
+        const response = await axios.post(`${CONSTANTS.BASEURL}/api/google`, { token: accessToken, data: user });
+        const Rectoken = response?.data?.token;
+        await storeToken(Rectoken);
+        navigation.replace("Home");
+      } else {
+      }
+    } catch (err) {
+      console.log(err);
+      alert(`Google Login Error: ${err?.response?.data?.message}`);
+      setLoginError(err?.response?.data?.message);
+      clearError();
+    }
+  };
+
+  const logInWithFacebook = async () => {
+    try {
+      await Facebook.initializeAsync({
+        appId: "440278890736378",
+      });
+      const {
+        type,
+        token,
+        expirationDate,
+        permissions,
+        declinedPermissions,
+      } = await Facebook.logInWithReadPermissionsAsync({
+        permissions: ["public_profile", "email"],
+      });
+      if (type === "success") {
+        const response = await axios.post(`${CONSTANTS.BASEURL}/api/facebook`, { token: token });
+        const Rectoken = response.data.token;
+        await storeToken(Rectoken);
+        navigation.replace("Home");
+      } else {
+        // type === 'cancel'
+      }
+    } catch (err) {
+      alert(`Facebook Login Error: ${err?.response?.data?.message}`);
+      setLoginError(err?.response?.data?.message);
+      clearError();
+    }
+  };
+
   const onSubmit = async (data) => {
     axios.post(`${CONSTANTS.BASEURL}/api/login`, data).then(
       async (response) => {
@@ -103,6 +157,22 @@ const LoginScreen = (props) => {
         <Text style={styles.buttonText} onPress={() => navigation.navigate("Signup")}>
           Create a new account?
         </Text>
+      </TouchableOpacity>
+      <TouchableOpacity>
+        <View style={{ flexDirection: "row", margin: 10 }}>
+          <Text style={styles.buttonText} onPress={() => logInWithFacebook()}>
+            Log in with
+          </Text>
+          <FontAwesome name="facebook-official" size={24} color="#4267b2" style={{ paddingLeft: 5 }} />
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity>
+        <View style={{ flexDirection: "row", margin: 10 }}>
+          <Text style={styles.buttonText} onPress={() => LogInWithGoogle()}>
+            Log in with
+          </Text>
+          <AntDesign name="google" size={24} color="#4285F4" style={{ paddingLeft: 5 }} />
+        </View>
       </TouchableOpacity>
       <Text style={styles.errorText}>{loginError}</Text>
     </View>

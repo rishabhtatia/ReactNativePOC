@@ -16,7 +16,7 @@ import CONSTANTS from "../constants/const";
 const SignupScreen = (props) => {
   const { navigation } = props;
   const initialFormValues = {
-    email: "rishabhtatia1@gmail.com",
+    email: "rishabhtatia211@gmail.com",
     password: "rishabh",
     firstname: "Rishabh",
     lastname: "Tatia",
@@ -34,8 +34,6 @@ const SignupScreen = (props) => {
     const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email) ? true : "Invalid Email";
   };
-
-  useEffect(() => {}, []);
   const onSubmit = async (data) => {
     axios.post(`${CONSTANTS.BASEURL}/api/signup`, data).then(
       (response) => {

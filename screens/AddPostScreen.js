@@ -24,6 +24,7 @@ const AddPostScreen = (props) => {
   const { navigation, route } = props;
   const [visible, setVisible] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
+  const [refreshImage, setRefreshImage] = useState(new Date());
   const [modalImage, setModalImage] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [onSubmitLoading, setonSubmitLoading] = useState(false);
@@ -70,7 +71,7 @@ const AddPostScreen = (props) => {
       setFormData(resp.data?.book);
       setIsLoading(false);
       setImageUrl(null);
-      setImageUrl(`${CONSTANTS.BASEURL}/api/imagepost/${id}`);
+      setImageUrl(`${CONSTANTS.BASEURL}/api/imagepost/${id}?refresh=${refreshImage}`);
     } catch (err) {
       console.log(err);
       setIsLoading(false);
@@ -88,6 +89,7 @@ const AddPostScreen = (props) => {
       setIsLoading(false);
     }
   }, []);
+
   const createFormData = (photo, body) => {
     let formData = new FormData();
     if (photo) {
@@ -111,13 +113,11 @@ const AddPostScreen = (props) => {
         const resp = await axios.patch(`${CONSTANTS.BASEURL}/api/updatepost/${route?.params?.id}`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log(resp.data.message);
         navigation.navigate("Home", { refresh: true });
       } else {
         const resp = await axios.post(`${CONSTANTS.BASEURL}/api/addpost`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log(resp.data.message);
         navigation.navigate("Home", { refresh: true });
       }
       setonSubmitLoading(false);
@@ -164,7 +164,7 @@ const AddPostScreen = (props) => {
                   <Card>
                     <Card.Cover
                       source={{
-                        uri: modalImage,
+                        uri: `${modalImage}`,
                       }}
                       style={{ height: 250 }}
                     />
@@ -180,14 +180,11 @@ const AddPostScreen = (props) => {
               </Portal>
               <TouchableWithoutFeedback onPress={() => showModal(imageUrl)}>
                 <View style={{ alignItems: "center", justifyContent: "center" }}>
-                  <Text>{imageUrl}</Text>
-                  <Text>{modalImage}</Text>
                   <Avatar.Image
                     size={200}
                     source={{
-                      uri: imageUrl,
+                      uri: `${imageUrl}`,
                     }}
-                    style={{ alignSelf: "center" }}
                   />
                 </View>
               </TouchableWithoutFeedback>
@@ -334,12 +331,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     paddingBottom: 20,
   },
-  // row: {
-  //   alignItems: "center",
-  //   flexDirection: "row",
-  //   marginVertical: 20,
-  //   justifyContent: "space-between",
-  // },
 });
 
 export default AddPostScreen;

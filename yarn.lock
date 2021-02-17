@@ -3123,6 +3123,13 @@
     "snapdragon" "^0.8.1"
     "to-regex" "^3.0.1"
 
+"expo-app-auth@~9.3.0":
+  "integrity" "sha512-f8OdQDNmC5vSdBWzwtic5pq+bmtSCYGU1KeVhKV3W8VgGIgVx40Q72q3M+SMs68bz4RCuC1g7LOGTOBWzXIuNw=="
+  "resolved" "https://registry.npmjs.org/expo-app-auth/-/expo-app-auth-9.3.0.tgz"
+  "version" "9.3.0"
+  dependencies:
+    "invariant" "^2.2.4"
+
 "expo-app-loading@^1.0.1":
   "integrity" "sha512-qgsystchwMHep43YMAMHJAD5bRUikolQpb1d+ySWF4ZFTtNInmLAPqiBcVSey5taRuHD3cAvEijx3wc0W/HfVw=="
   "resolved" "https://registry.npmjs.org/expo-app-loading/-/expo-app-loading-1.0.1.tgz"
@@ -3151,7 +3158,7 @@
   "resolved" "https://registry.npmjs.org/expo-checkbox/-/expo-checkbox-1.0.2.tgz"
   "version" "1.0.2"
 
-"expo-constants@~9.3.3":
+"expo-constants@*", "expo-constants@~9.3.3":
   "integrity" "sha512-qIlv2ffSjQl3wrvJwXYoNfQNfH/sK46EXcgyEQnQ1SAQO4ukwTEpG9j3fdW6aTiVEVrv/DsA1IaVRqKrUwSd3A=="
   "resolved" "https://registry.npmjs.org/expo-constants/-/expo-constants-9.3.5.tgz"
   "version" "9.3.5"
@@ -3175,6 +3182,11 @@
   dependencies:
     "fbjs" "1.0.0"
 
+"expo-facebook@^9.1.0":
+  "integrity" "sha512-DoqzqAQkEYVViAShV122Cll2WWubEKLyOxRO8yDYFMbst4EH7Ep8NPCKcHKgXFYh8Oi+JYSdhsdpMraahmcX8A=="
+  "resolved" "https://registry.npmjs.org/expo-facebook/-/expo-facebook-9.1.0.tgz"
+  "version" "9.1.0"
+
 "expo-file-system@~9.3.0":
   "integrity" "sha512-x83IVep6PVfzGLpzR5fhWgKGlDaF95vfRzvmLyOMnbSuM8gY9a8C92taxZxfitryy9+D46lbRcnxPvBqFkXMNg=="
   "resolved" "https://registry.npmjs.org/expo-file-system/-/expo-file-system-9.3.0.tgz"
@@ -3189,6 +3201,13 @@
   dependencies:
     "fbjs" "1.0.0"
     "fontfaceobserver" "^2.1.0"
+
+"expo-google-app-auth@^8.1.4":
+  "integrity" "sha512-2hXZCXEo7Dg3SDcc73MDniL+tJdwUzeBxTvXTGpnTKNF3JakuehLnx9ALuuEU86MKvM49/a3FiflhfEiWZ5qDw=="
+  "resolved" "https://registry.npmjs.org/expo-google-app-auth/-/expo-google-app-auth-8.1.4.tgz"
+  "version" "8.1.4"
+  dependencies:
+    "expo-app-auth" "~9.3.0"
 
 "expo-image-picker@~9.2.0":
   "integrity" "sha512-IPrBY7+zgxUUZqjtLVfj+PTKMm6lmI48Z9b8BKJhY/gF49g/cDZwWN0mrg+3G3a3ug5TtIr+pektsNWp1V+T1g=="
@@ -6741,7 +6760,7 @@
   "resolved" "https://registry.npmjs.org/unimodules-camera-interface/-/unimodules-camera-interface-5.4.0.tgz"
   "version" "5.4.0"
 
-"unimodules-constants-interface@~5.4.0":
+"unimodules-constants-interface@*", "unimodules-constants-interface@~5.4.0":
   "integrity" "sha512-6oqSt9zuI+dES56TABBi390FkVCozTN+hYfX0Kf6HdlnDpXTQqKZNfyWQgP7E78dIyB9b0q+kH7kTLLq+HNfOQ=="
   "resolved" "https://registry.npmjs.org/unimodules-constants-interface/-/unimodules-constants-interface-5.4.0.tgz"
   "version" "5.4.0"

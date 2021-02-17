@@ -13,7 +13,6 @@ const logOut = async ({ navigation }) => {
   try {
     const token = await AsyncStorage.getItem("token");
     await axios.post(`${CONSTANTS.BASEURL}/api/logout`, {}, { headers: { Authorization: `Bearer ${token}` } });
-    console.log("LOGGED OUT");
     await AsyncStorage.removeItem("token");
     navigation.replace("Login");
   } catch (error) {

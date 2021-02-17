@@ -3,18 +3,19 @@ import axios from "axios";
 import React, { useRef } from "react";
 import { useState } from "react";
 import { ActivityIndicator, Animated, FlatList, Image, StyleSheet, Text, View } from "react-native";
-import { Button } from "react-native-paper";
 import { useEffect } from "react/cjs/react.development";
 import { fakedata } from "../json/fakedata";
 import CONSTANTS from "../constants/const";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { Searchbar } from "react-native-paper";
 const ITEM_SIZE = 70 + 20 * 3;
 const HomeScreen = (props) => {
   const scrollY = useRef(new Animated.Value(0)).current;
   const { navigation, route } = props;
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [page, setPage] = useState(1);
+  const [refreshImage, setRefreshImage] = useState(new Date());
+  const [filterOptions, setFilterOptions] = useState({ page: 1, searchText: "" });
   const [maxRows, setMaxRows] = useState(0);
   const [post, setPost] = useState([]);
 
@@ -24,7 +25,7 @@ const HomeScreen = (props) => {
       const token = await AsyncStorage.getItem("token");
       const resp = await axios.get(`${CONSTANTS.BASEURL}/api/post`, {
         headers: { Authorization: `Bearer ${token}` },
-        params: { pagesize: 10, page: page },
+        params: { pagesize: 10, ...filterOptions },
       });
       setMaxRows(resp.data.maxRows);
       const modifiedPosts = resp.data.posts.map((data) => {
@@ -32,10 +33,10 @@ const HomeScreen = (props) => {
           id: data._id,
           author: data.author,
           title: data.title,
-          image: `${CONSTANTS.BASEURL}/api/imagepost/${data._id}`,
+          image: `${CONSTANTS.BASEURL}/api/imagepost/${data._id}?refresh=${new Date()}`,
         };
       });
-      if (page === 1) {
+      if (filterOptions.page === 1) {
         setPost(modifiedPosts);
       } else if (post.length < resp.data.maxRows) {
         setPost((prevState) => [...prevState, ...modifiedPosts]);
@@ -49,20 +50,19 @@ const HomeScreen = (props) => {
       setRefreshing(false);
     }
   };
-  const pulltoRefresh = () => setPage(1);
+  const pulltoRefresh = () => {
+    setFilterOptions((prevState) => ({ ...prevState, page: 1 }));
+  };
   const loadMore = () => {
     if (post.length < maxRows) {
-      setPage(page + 1);
+      setFilterOptions((prevState) => ({ ...prevState, page: +filterOptions.page + 1 }));
     }
   };
   useEffect(() => {
-    getPosts();
-  }, [page]);
-  useEffect(() => {
-    if (route?.params?.refresh) {
-      pulltoRefresh();
+    if (filterOptions.page !== null) {
+      getPosts();
     }
-  }, [route?.params?.refresh]);
+  }, [filterOptions]);
 
   return (
     <View style={styles.container}>
@@ -70,16 +70,23 @@ const HomeScreen = (props) => {
         <ActivityIndicator size="large" color="orange" />
       ) : (
         <View>
+          <View style={{ margin: 5 }}>
+            <Searchbar
+              placeholder="Search"
+              value={filterOptions.searchText}
+              onChangeText={(query) => setFilterOptions((prevState) => ({ ...prevState, searchText: query, page: 1 }))}
+            />
+          </View>
           <FlatList
             // onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
-            contentContainerStyle={{ padding: 20 }}
+            contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 20 }}
             data={post}
             renderItem={({ item, index }) => {
               // const inputRange = [-1, 0, ITEM_SIZE * index, ITEM_SIZE * (index + 2)];
               // const scale = scrollY.interpolate({ inputRange, outputRange: [1, 1, 1, 0] });
               // const opacity = scrollY.interpolate({ inputRange, outputRange: [1, 1, 1, 0] });
               return (
-                <TouchableWithoutFeedback onPress={() => navigation.navigate("Post", { id: item.id })}>
+                <TouchableWithoutFeedback onLongPress={() => navigation.navigate("Post", { id: item.id })}>
                   <View
                     style={{
                       backgroundColor: "lightpink",
@@ -100,7 +107,6 @@ const HomeScreen = (props) => {
                   >
                     <Image
                       source={{ uri: item.image }}
-                      // source={{ uri: item.imageLink }}
                       style={{ width: 70, height: 70, borderRadius: 70, marginRight: 10, resizeMode: "cover" }}
                     />
                     <View style={{ flexShrink: 1 }}>
@@ -117,6 +123,7 @@ const HomeScreen = (props) => {
             refreshing={refreshing}
             onRefresh={() => pulltoRefresh()}
             initialNumToRender={10}
+            ListFooterComponent={() => (refreshing ? <ActivityIndicator size="large" color="orange" /> : null)}
           />
         </View>
       )}
